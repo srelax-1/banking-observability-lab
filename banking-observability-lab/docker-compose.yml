@@ -32,8 +32,13 @@ services:
   notification-service:
     build: ./notification-service
     container_name: notification-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://bankuser:bankpass@database:5432/bankdb
     ports:
       - "8003:8003"
+    depends_on:
+      database:
+        condition: service_healthy
     restart: unless-stopped
 
   payment-service:
@@ -60,11 +65,13 @@ services:
     environment:
       AUTH_SERVICE_URL: http://auth-service:8001
       PAYMENT_SERVICE_URL: http://payment-service:8002
+      NOTIFICATION_SERVICE_URL: http://notification-service:8003
     ports:
       - "8000:8000"
     depends_on:
       - auth-service
       - payment-service
+      - notification-service
     restart: unless-stopped
 
   frontend-service:
