@@ -12,6 +12,7 @@ logger.setLevel(logging.INFO)
 
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8001")
 PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL", "http://payment-service:8002")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://notification-service:8003")
 
 app = FastAPI(title="API Gateway", version="1.0.0")
 
@@ -35,6 +36,7 @@ async def health():
         for name, url in {
             "auth-service": f"{AUTH_SERVICE_URL}/health",
             "payment-service": f"{PAYMENT_SERVICE_URL}/health",
+            "notification-service": f"{NOTIFICATION_SERVICE_URL}/health",
         }.items():
             try:
                 response = await client.get(url)
@@ -91,6 +93,22 @@ async def create_payment(request: Request):
 @app.get("/payments/{username}")
 async def list_payments(username: str):
     status_code, data = await forward("GET", f"{PAYMENT_SERVICE_URL}/payments/{username}")
+    if status_code >= 400:
+        raise HTTPException(status_code=status_code, detail=data)
+    return data
+
+
+@app.get("/notifications/{username}")
+async def list_notifications(username: str):
+    status_code, data = await forward("GET", f"{NOTIFICATION_SERVICE_URL}/notifications/{username}")
+    if status_code >= 400:
+        raise HTTPException(status_code=status_code, detail=data)
+    return data
+
+
+@app.patch("/notifications/{notification_id}/read")
+async def mark_notification_as_read(notification_id: int):
+    status_code, data = await forward("PATCH", f"{NOTIFICATION_SERVICE_URL}/notifications/{notification_id}/read")
     if status_code >= 400:
         raise HTTPException(status_code=status_code, detail=data)
     return data
