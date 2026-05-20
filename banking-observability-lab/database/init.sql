@@ -25,4 +25,3 @@ CREATE TABLE IF NOT EXISTS notifications (
     status VARCHAR(50) NOT NULL DEFAULT 'unread',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-""")
