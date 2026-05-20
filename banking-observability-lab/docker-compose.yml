@@ -1,0 +1,82 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: banking-database
+    environment:
+      POSTGRES_USER: bankuser
+      POSTGRES_PASSWORD: bankpass
+      POSTGRES_DB: bankdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - banking_postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bankuser -d bankdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://bankuser:bankpass@database:5432/bankdb
+    ports:
+      - "8001:8001"
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    environment:
+      DATABASE_URL: postgresql+psycopg2://bankuser:bankpass@database:5432/bankdb
+      AUTH_SERVICE_URL: http://auth-service:8001
+      NOTIFICATION_SERVICE_URL: http://notification-service:8003
+    ports:
+      - "8002:8002"
+    depends_on:
+      database:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+    restart: unless-stopped
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8001
+      PAYMENT_SERVICE_URL: http://payment-service:8002
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-service
+      - payment-service
+    restart: unless-stopped
+
+  frontend-service:
+    build: ./frontend-service
+    container_name: frontend-service
+    environment:
+      API_GATEWAY_URL: http://api-gateway:8000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+volumes:
+  banking_postgres_data:

@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL,
+    recipient VARCHAR(100) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    notification_status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
+    payment_id INTEGER NOT NULL,
+    sender VARCHAR(100) NOT NULL,
+    recipient VARCHAR(100) NOT NULL,
+    amount NUMERIC(12, 2) NOT NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'unread',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+""")
