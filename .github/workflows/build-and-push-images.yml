@@ -38,6 +38,8 @@ jobs:
             context: ./banking-observability-lab/payment-service
           - name: notification-service
             context: ./banking-observability-lab/notification-service
+          - name: load-generator
+            context: ./banking-observability-lab/load-generator
 
     steps:
       - name: Checkout repository
