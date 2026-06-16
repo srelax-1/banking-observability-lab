@@ -29,19 +29,21 @@ jobs:
       matrix:
         service:
           - name: frontend-service
-            context: ./frontend-service
+            context: ./banking-observability-lab/frontend-service
           - name: api-gateway
-            context: ./api-gateway
+            context: ./banking-observability-lab/api-gateway
           - name: auth-service
-            context: ./auth-service
+            context: ./banking-observability-lab/auth-service
           - name: payment-service
-            context: ./payment-service
+            context: ./banking-observability-lab/payment-service
           - name: notification-service
-            context: ./notification-service
+            context: ./banking-observability-lab/notification-service
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set lowercase image namespace
         run: |
@@ -78,4 +80,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.service.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service.name }}
+          cache-to: type=gha,mode=min,scope=${{ matrix.service.name }}
