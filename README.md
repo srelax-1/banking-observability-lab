@@ -10,11 +10,12 @@ Services:
 - payment-service
 - notification-service
 - postgres database
+- loadgenerator
 
 ## Run
 
 ```bash
-docker compose up --build
+docker compose --profile loadtest up --build load-generator
 ```
 
 Open:
