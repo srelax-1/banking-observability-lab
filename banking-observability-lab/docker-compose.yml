@@ -85,5 +85,20 @@ services:
       - api-gateway
     restart: unless-stopped
 
+  load-generator:
+    build: ./load-generator
+    container_name: banking-load-generator
+    profiles: ["loadtest"]
+    environment:
+      LOADGEN_PASSWORD: LoadTest123!
+      LOADGEN_USER_PREFIX: loadtest
+      LOADGEN_MIN_PAYMENT: 1000
+      LOADGEN_MAX_PAYMENT: 500000
+    ports:
+      - "8089:8089"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
 volumes:
   banking_postgres_data:
